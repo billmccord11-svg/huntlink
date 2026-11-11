@@ -33,12 +33,17 @@
   <li><strong>Your name</strong>, as you typed it.</li>
   <li><strong>Your position on the map</strong>, updated about every 10 seconds while the app is open. Hunt Link does not share your position when the app is closed.</li>
   <li><strong>Your chat messages</strong>, along with where you were when you sent each one.</li>
-  <li><strong>Waypoints you save</strong> to the group.</li>
+  <li><strong>Waypoints you save</strong> to the group. (When you save a waypoint, you can pick <em>Only my phone</em> instead.)</li>
 </ul>
 <p>This information is stored on Google Firebase (Cloud Firestore) so your group can see it, including after a spell without signal. Security rules let only group members read it, and only you can change or delete what's yours. The person who created a group can also delete messages and waypoints in it.</p>
 
 <h2>What stays on your phone</h2>
-<p>Recorded tracks (Rec), drawings, the breadcrumb trail, downloaded maps, your blocked list and your settings are saved <strong>only on your phone</strong>. They are never sent to us. A track or drawing leaves your phone only if you tap Share and choose where to send it.</p>
+<p>Recorded tracks (Rec), drawings, waypoints marked <em>on this phone</em>, the breadcrumb trail, downloaded maps, your blocked list and your settings are saved <strong>only on your phone</strong>. They are never sent to us. They leave your phone only if you tap Share and choose where to send them.</p>
+<p>You can also use Hunt Link <strong>on your own</strong>, without a group. Then nothing about your location, waypoints, tracks or drawings is sent to Hunt Link's servers.</p>
+
+<h2>Sharing links</h2>
+<p>When you share a waypoint, track or drawing as a <em>Hunt Link link</em>, the item itself (its name, color and points) is packed into the link. Nothing is stored on our servers. Whoever has the link can see the item, so send it only to people you want to have it. Long tracks are simplified to fit.</p>
+<p>Tapping the link opens a page on our website (hosted by GitHub Pages). The item is in the part of the link after the <code>#</code>, which your phone never sends to the website, so the website can't see what was shared. GitHub receives your phone's internet address when the page loads, like any website. If you tap <em>Open in Hunt Link</em>, the item is saved only on your phone.</p>
 
 <h2>Location</h2>
 <p>Hunt Link uses your phone's GPS to show you on the map, share your spot with your group, guide you to waypoints and work out legal shooting light. If you tap <em>Rec</em>, the app keeps recording your track with the screen locked until you tap Stop; while it records, your phone shows that location is in use. That track stays on your phone. Hunt Link never asks for "always" location access.</p>
@@ -49,6 +54,7 @@
 <h2>Services Hunt Link uses</h2>
 <ul>
   <li><strong>Google Firebase</strong>: anonymous sign-in and the group data described above.</li>
+  <li><strong>GitHub Pages</strong>: hosts this website, including the page a Hunt Link link opens.</li>
   <li><strong>Mapbox</strong>: map images. Your phone asks Mapbox for the part of the map you're looking at. Hunt Link turns off Mapbox's usage tracking.</li>
   <li><strong>US Geological Survey, US Forest Service, and the Arizona, Colorado and New Mexico wildlife agencies</strong>: topo maps, forest roads and hunt unit lines, loaded from their public map services.</li>
   <li><strong>Open-Meteo</strong>: weather. When you open the WX tab, the app sends your approximate location to Open-Meteo to get the forecast.</li>

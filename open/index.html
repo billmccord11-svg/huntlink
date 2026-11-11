@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Hunt Link: shared with you</title>
+<style>
+  :root { --ink:#1d2216; --muted:#5f6656; --accent:#c96a12; --bg:#f5f4ee; --card:#fff; --line:#e1e0d6; --map:#e9e7dc; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#e8e6dd; --muted:#9aa08c; --accent:#e8862a; --bg:#14170f; --card:#1d2216; --line:#3a4230; --map:#262c1e; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:520px; margin:0 auto; padding:28px 20px 56px; }
+  .logo { font-weight:800; font-size:22px; color:var(--accent); letter-spacing:1px; margin:0 0 18px; }
+  .logo span { color:var(--ink); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; }
+  .kind { color:var(--muted); font-size:14px; text-transform:uppercase; letter-spacing:1px; margin:0; }
+  h1 { font-size:24px; margin:2px 0 4px; word-wrap:break-word; }
+  .detail { color:var(--muted); margin:0 0 14px; }
+  svg { display:block; width:100%; height:200px; background:var(--map); border-radius:10px; margin-bottom:16px; }
+  .btn { display:block; text-align:center; background:var(--accent); color:#14170f; font-weight:800; text-decoration:none;
+         padding:15px; border-radius:12px; font-size:18px; }
+  .alt { display:block; text-align:center; color:var(--accent); margin-top:14px; }
+  .note { color:var(--muted); font-size:14px; margin-top:18px; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<main>
+<p class="logo">HUNT<span>LINK</span></p>
+
+<div class="card hide" id="item">
+  <p class="kind" id="kind"></p>
+  <h1 id="name"></h1>
+  <p class="detail" id="detail"></p>
+  <svg id="shape" viewBox="0 0 300 200" aria-hidden="true"></svg>
+  <a class="btn" id="open" href="#">Open in Hunt Link</a>
+  <a class="alt" id="gmap" href="#" rel="noopener">See it on Google Maps</a>
+  <p class="note">Tapping <strong>Open in Hunt Link</strong> adds it to your map, saved only on your phone. Nothing happens? You need the newest version of Hunt Link.</p>
+  <p class="note">Don't have Hunt Link yet? It's in testing. Ask the person who sent you this for an invite. <a href="../">About Hunt Link</a></p>
+</div>
+
+<div class="card hide" id="bad">
+  <h1>This link didn't come through whole</h1>
+  <p class="detail">Some texting apps cut long links short. Ask the person who sent it to share it again, or to send the GPX file instead.</p>
+</div>
+</main>
+
+<script>
+// Reads the item packed into the link after the #. Same format as src/sharelink.js in the app.
+// Nothing here is sent anywhere: the part after the # never leaves your phone.
+(function () {
+  var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  var KINDS = { w: 'Waypoint', t: 'Track', d: 'Drawing' };
+  function fromB64url(s) {
+    if (!/^[A-Za-z0-9_-]+$/.test(s) || s.length % 4 === 1) throw new Error('bad');
+    var bytes = [];
+    for (var i = 0; i < s.length; i += 4) {
+      var v = [0, 1, 2, 3].map(function (j) { return i + j < s.length ? B64.indexOf(s[i + j]) : 0; });
+      var n = (v[0] << 18) | (v[1] << 12) | (v[2] << 6) | v[3];
+      bytes.push((n >> 16) & 255);
+      if (i + 2 < s.length) bytes.push((n >> 8) & 255);
+      if (i + 3 < s.length) bytes.push(n & 255);
+    }
+    return new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes));
+  }
+  function decodePolyline(str) {
+    var pts = [], i = 0, lat = 0, lon = 0;
+    function next() {
+      var res = 0, shift = 0, b;
+      do {
+        if (i >= str.length) throw new Error('bad');
+        b = str.charCodeAt(i++) - 63;
+        if (b < 0 || b > 63) throw new Error('bad');
+        res |= (b & 0x1f) << shift; shift += 5;
+      } while (b >= 0x20 && shift < 35);
+      return res & 1 ? ~(res >> 1) : res >> 1;
+    }
+    while (i < str.length) {
+      lat += next(); lon += next();
+      pts.push([lon / 1e5, lat / 1e5]);
+      if (pts.length > 2000) throw new Error('bad');
+    }
+    return pts;
+  }
+  function show(id) { document.getElementById(id).classList.remove('hide'); }
+  var payload = location.hash.slice(1), o, pts;
+  try {
+    o = JSON.parse(fromB64url(payload));
+    if (!o || o.v !== 1 || !KINDS[o.k] || typeof o.p !== 'string') throw new Error('bad');
+    pts = decodePolyline(o.p);
+    if (!pts.length || (o.k === 'w' ? pts.length !== 1 : pts.length < 2)) throw new Error('bad');
+    pts.forEach(function (p) { if (Math.abs(p[1]) > 90 || Math.abs(p[0]) > 180) throw new Error('bad'); });
+  } catch (e) { show('bad'); return; }
+
+  var name = String(o.n || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 60) || 'Shared ' + KINDS[o.k].toLowerCase();
+  var color = /^#[0-9a-fA-F]{6}$/.test(o.c || '') ? o.c : (o.k === 't' ? '#c79bff' : '#e8862a');
+  var f5 = function (v) { return v.toFixed(5); };
+  var first = pts[0];
+  document.getElementById('kind').textContent = KINDS[o.k] + ' shared with you';
+  document.getElementById('name').textContent = name;
+  document.getElementById('detail').textContent =
+    (o.k === 't' && typeof o.m === 'number' ? o.m.toFixed(2) + ' mi · starts at ' : '') + f5(first[1]) + ', ' + f5(first[0]);
+  document.title = 'Hunt Link: ' + name;
+  document.getElementById('open').href = 'huntlink://open?d=' + payload;
+  document.getElementById('gmap').href = 'https://www.google.com/maps/search/?api=1&query=' + f5(first[1]) + ',' + f5(first[0]);
+
+  // A simple outline of the shape (no map behind it), so they can see what it is
+  var svg = document.getElementById('shape'), NS = 'http://www.w3.org/2000/svg';
+  var k = Math.cos(first[1] * Math.PI / 180);
+  var xs = pts.map(function (p) { return p[0] * k; }), ys = pts.map(function (p) { return p[1]; });
+  var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs), minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+  var span = Math.max(maxX - minX, maxY - minY) || 1, sc = 160 / span;
+  var cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  var X = function (i) { return 150 + (xs[i] - cx) * sc; }, Y = function (i) { return 100 - (ys[i] - cy) * sc; };
+  if (pts.length === 1) {
+    var c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', 150); c.setAttribute('cy', 100); c.setAttribute('r', 11);
+    c.setAttribute('fill', color); c.setAttribute('stroke', '#fff'); c.setAttribute('stroke-width', 4);
+    svg.appendChild(c);
+  } else {
+    var d = pts.map(function (_, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(i).toFixed(1); }).join(' ');
+    [['#14170f', 8, 0.5], [color, 4.5, 1]].forEach(function (st) {
+      var p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', st[0]);
+      p.setAttribute('stroke-width', st[1]); p.setAttribute('stroke-opacity', st[2]);
+      p.setAttribute('stroke-linecap', 'round'); p.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(p);
+    });
+  }
+  show('item');
+})();
+</script>
+</body>
+</html>
