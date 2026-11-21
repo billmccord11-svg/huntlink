@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="referrer" content="no-referrer">
-<title>Hunt Link: shared with you</title>
+<title>AntlerPin: shared with you</title>
 <style>
   :root { --ink:#1d2216; --muted:#5f6656; --accent:#c96a12; --bg:#f5f4ee; --card:#fff; --line:#e1e0d6; --map:#e9e7dc; }
   @media (prefers-color-scheme: dark) { :root { --ink:#e8e6dd; --muted:#9aa08c; --accent:#e8862a; --bg:#14170f; --card:#1d2216; --line:#3a4230; --map:#262c1e; } }
@@ -27,17 +27,17 @@
 </head>
 <body>
 <main>
-<p class="logo">HUNT<span>LINK</span></p>
+<p class="logo">ANTLER<span>PIN</span></p>
 
 <div class="card hide" id="item">
   <p class="kind" id="kind"></p>
   <h1 id="name"></h1>
   <p class="detail" id="detail"></p>
   <svg id="shape" viewBox="0 0 300 200" aria-hidden="true"></svg>
-  <a class="btn" id="open" href="#">Open in Hunt Link</a>
+  <a class="btn" id="open" href="#">Open in AntlerPin</a>
   <a class="alt" id="gmap" href="#" rel="noopener">See it on Google Maps</a>
-  <p class="note">Tapping <strong>Open in Hunt Link</strong> adds it to your map, saved only on your phone. Nothing happens? You need the newest version of Hunt Link.</p>
-  <p class="note">Don't have Hunt Link yet? It's in testing. Ask the person who sent you this for an invite. <a href="../">About Hunt Link</a></p>
+  <p class="note">Tapping <strong>Open in AntlerPin</strong> adds it to your map, saved only on your phone. Nothing happens? You need the newest version of AntlerPin.</p>
+  <p class="note">Don't have AntlerPin yet? It's in testing. Ask the person who sent you this for an invite. <a href="../">About AntlerPin</a></p>
 </div>
 
 <div class="card hide" id="bad">
@@ -101,7 +101,7 @@
   document.getElementById('name').textContent = name;
   document.getElementById('detail').textContent =
     (o.k === 't' && typeof o.m === 'number' ? o.m.toFixed(2) + ' mi · starts at ' : '') + f5(first[1]) + ', ' + f5(first[0]);
-  document.title = 'Hunt Link: ' + name;
+  document.title = 'AntlerPin: ' + name;
   document.getElementById('open').href = 'huntlink://open?d=' + payload;
   document.getElementById('gmap').href = 'https://www.google.com/maps/search/?api=1&query=' + f5(first[1]) + ',' + f5(first[0]);
 
